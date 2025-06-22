@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק מתמטיקה לילדים</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .game-area {
+            margin: 30px 0;
+        }
+        
+        .question {
+            font-size: 3em;
+            color: #4a5568;
+            margin: 20px 0;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            direction: ltr;
+            unicode-bidi: embed;
+        }
+        
+        .answer-input {
+            font-size: 2.5em;
+            padding: 15px;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            text-align: center;
+            width: 200px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            direction: ltr;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            font-size: 1.3em;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            background: #edf2f7;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            font-size: 1.2em;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .level-selector {
+            margin: 20px 0;
+        }
+        
+        .level-btn {
+            font-size: 1.1em;
+            padding: 10px 20px;
+            margin: 5px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .level-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .feedback {
+            font-size: 1.5em;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        .correct {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #38a169;
+        }
+        
+        .incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #e53e3e;
+        }
+        
+        .emoji {
+            font-size: 1.5em;
+            margin: 0 10px;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .bounce {
+            animation: bounce 0.6s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 משחק מתמטיקה 🎯</h1>
+        
+        <div class="level-selector">
+            <h3>בחר רמת קושי:</h3>
+            <button class="level-btn active" onclick="setLevel(1)">קל (1-10)</button>
+            <button class="level-btn" onclick="setLevel(2)">בינוני (10-50)</button>
+            <button class="level-btn" onclick="setLevel(3)">קשה (10-100)</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="score">0</div>
+                <div class="stat-label">נקודות</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="streak">0</div>
+                <div class="stat-label">רצף נכונות</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="level">1</div>
+                <div class="stat-label">רמה</div>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <div class="question" id="question">לחץ התחל כדי לשחק!</div>
+            <input type="number" class="answer-input" id="answer" placeholder="?" style="display: none;">
+            <div class="feedback" id="feedback" style="display: none;"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="startGame()">התחל משחק</button>
+            <button class="btn btn-primary" onclick="checkAnswer()" style="display: none;" id="checkBtn">בדוק תשובה</button>
+            <button class="btn btn-secondary" onclick="nextQuestion()" style="display: none;" id="nextBtn">שאלה הבאה</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = {};
+        let score = 0;
+        let streak = 0;
+        let currentLevel = 1;
+        let gameActive = false;
+        
+        // בעיות לפי רמה
+        const levelRanges = {
+            1: { min: 1, max: 10 },
+            2: { min: 10, max: 50 },
+            3: { min: 10, max: 100 }
+        };
+        
+        const operations = ['+', '-', '×', '÷'];
+        
+        function setLevel(level) {
+            currentLevel = level;
+            document.getElementById('level').textContent = level;
+            
+            // עדכון כפתורי הרמה
+            document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (gameActive) {
+                generateQuestion();
+            }
+        }
+        
+        function generateQuestion() {
+            const range = levelRanges[currentLevel];
+            const operation = operations[Math.floor(Math.random() * operations.length)];
+            
+            let num1, num2, answer;
+            
+            switch(operation) {
+                case '+':
+                    num1 = Math.floor(Math.random() * range.max) + range.min;
+                    num2 = Math.floor(Math.random() * range.max) + range.min;
+                    answer = num1 + num2;
+                    break;
+                    
+                case '-':
+                    num1 = Math.floor(Math.random() * range.max) + range.min;
+                    num2 = Math.floor(Math.random() * num1) + 1; // כדי שהתשובה תהיה חיובית
+                    answer = num1 - num2;
+                    break;
+                    
+                case '×':
+                    num1 = Math.floor(Math.random() * Math.min(range.max/5, 12)) + 1;
+                    num2 = Math.floor(Math.random() * Math.min(range.max/5, 12)) + 1;
+                    answer = num1 * num2;
+                    break;
+                    
+                case '÷':
+                    answer = Math.floor(Math.random() * Math.min(range.max/5, 12)) + 1;
+                    num2 = Math.floor(Math.random() * Math.min(range.max/5, 12)) + 1;
+                    num1 = answer * num2; // כדי שהחלוקה תהיה שלמה
+                    break;
+            }
+            
+            currentQuestion = {
+                num1: num1,
+                num2: num2,
+                operation: operation,
+                answer: answer
+            };
+            
+            document.getElementById('question').textContent = `${num1} ${operation} ${num2} = ?`;
+            document.getElementById('answer').value = '';
+            document.getElementById('answer').focus();
+        }
+        
+        function startGame() {
+            gameActive = true;
+            generateQuestion();
+            
+            // הצגת אלמנטי המשחק
+            document.getElementById('answer').style.display = 'block';
+            document.getElementById('checkBtn').style.display = 'inline-block';
+            document.querySelector('.btn-primary').style.display = 'none';
+            
+            // הוספת מאזין לכפתור Enter
+            document.getElementById('answer').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        }
+        
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('answer').value);
+            const feedback = document.getElementById('feedback');
+            
+            if (isNaN(userAnswer)) {
+                feedback.textContent = 'אנא הכנס מספר!';
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                return;
+            }
+            
+            if (userAnswer === currentQuestion.answer) {
+                score += 10;
+                streak++;
+                
+                feedback.innerHTML = `<span class="emoji">🎉</span>נכון! כל הכבוד!<span class="emoji">🎉</span>`;
+                feedback.className = 'feedback correct bounce';
+                
+                // הוספת נקודות בונוס לרצף
+                if (streak % 5 === 0) {
+                    score += 20;
+                    feedback.innerHTML += `<br><span class="emoji">🔥</span>בונוס רצף! +20 נקודות!<span class="emoji">🔥</span>`;
+                }
+            } else {
+                streak = 0;
+                feedback.innerHTML = `<span class="emoji">❌</span>לא נכון. התשובה הנכונה היא ${currentQuestion.answer}<span class="emoji">💪</span>`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            feedback.style.display = 'block';
+            
+            // עדכון נתונים
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+            
+            // הסתרת כפתור בדיקה והצגת כפתור הבא
+            document.getElementById('checkBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+        
+        function nextQuestion() {
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('checkBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            generateQuestion();
+        }
+        
+        // הוספת אפקטים חזותיים
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn')) {
+                e.target.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    e.target.style.transform = 'scale(1)';
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>
